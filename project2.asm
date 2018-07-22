@@ -104,8 +104,8 @@ main_time_input:
 	la $a0, TIME_1
 	la $a1, time_temp
 	jal time_input
-	add $s0, $0, $v0	# luu TIME_1
-	add $s1, $0, $v1	# luu tinh hop le TIME_1
+	add $s0, $0, $v0			# luu TIME_1
+	add $s1, $0, $v1			# luu tinh hop le TIME_1
 	beq $s1, $0, main_time_input_again 	# khong hop le
 	j main_select
 main_time_input_again:
@@ -185,8 +185,7 @@ main_select_2:
 	syscall
 	add $s2, $0, $v0	# $s2 = type
 
-	# print new line
-	add $a0, $0, 10	# 10 = '\n'
+	add $a0, $0, 10		# 10 = '\n'
 	addi $v0, $0, 11	
 	syscall
 
@@ -277,7 +276,7 @@ main_select_6:
 	addi $v0, $0, 1 	
 	syscall
 
-	add $a0, $0, 32	# 32 = ' '
+	add $a0, $0, 32		# 32 = ' '
 	addi $v0, $0, 11	
 	syscall
 
@@ -317,48 +316,48 @@ main_exit:
 #       $a0 : day
 #       $a1 : month
 #       $a2 : year
-#       $a3 : chuoi TIME
-#		$v0 : chuoi TIME dang DD/MM/YYYY
+#       $a3 : dia chi chuoi TIME
+#	$v0 : chuoi TIME dang DD/MM/YYYY
 Date:
 	# day -> DD
 	addi $t1, $0, 10
 	div $a0, $t1
 	mflo $t2			# $t2 = day / 10
 	mfhi $t3			# $t3 = day % 10
-	addi $t2, $t2, 48	# chuyen $t2 tu kieu int sang kieu char
-	addi $t3, $t3, 48	# chuyen $t3 tu kieu int sang kieu char
-	sb $t2, 0($a3)		# TIME[0] = $t2
-	sb $t3, 1($a3)		# TIME[1] = $t3
-	addi $t4, $0, 47	# 47 = '/'
-	sb $t4, 2($a3)		# TIME[2] = '/'
+	addi $t2, $t2, 48		# chuyen $t2 tu kieu int sang kieu char
+	addi $t3, $t3, 48		# chuyen $t3 tu kieu int sang kieu char
+	sb $t2, 0($a3)			# TIME[0] = $t2
+	sb $t3, 1($a3)			# TIME[1] = $t3
+	addi $t4, $0, 47		# 47 = '/'
+	sb $t4, 2($a3)			# TIME[2] = '/'
 
 	# month -> MM
 	addi $t1, $0, 10
 	div $a1, $t1
 	mflo $t2			# $t2 = month / 10
 	mfhi $t3			# $t3 = month % 10
-	addi $t2, $t2, 48	# $t2 from int to char
-	addi $t3, $t3, 48	# $t3 from int to char
-	sb $t2, 3($a3)		# TIME[3] = $t2
-	sb $t3, 4($a3)		# TIME[4] = $t3
-	addi $t4, $0, 47	# 47 = '/'
-	sb $t4, 5($a3)		# TIME[5] = '/'
+	addi $t2, $t2, 48		# $t2 from int to char
+	addi $t3, $t3, 48		# $t3 from int to char
+	sb $t2, 3($a3)			# TIME[3] = $t2
+	sb $t3, 4($a3)			# TIME[4] = $t3
+	addi $t4, $0, 47		# 47 = '/'
+	sb $t4, 5($a3)			# TIME[5] = '/'
 
 	# year -> YYYY
-	add $t0, $0, $a2	# $t0 luu year
+	add $t0, $0, $a2		# $t0 luu year
 	addi $t1, $0, 1000
 	div $t0, $t1
 	mflo $t2			# $t2 = year / 1000
 	mfhi $t0			# $t0 = year % 1000
 	addi $t2, $t2, 48
-	sb $t2, 6($a3)		# TIME[6] = $t2
+	sb $t2, 6($a3)			# TIME[6] = $t2
 
 	addi $t1, $0, 100
 	div $t0, $t1
 	mflo $t2			# $t2 = (year % 1000) / 100
 	mfhi $t0			# $t0 = year % 100
 	addi $t2, $t2, 48
-	sb $t2, 7($a3)		# TIME[7] = $t2
+	sb $t2, 7($a3)			# TIME[7] = $t2
 
 	addi $t1, $0, 10
 	div $t0, $t1
@@ -366,11 +365,11 @@ Date:
 	mfhi $t0			# $t0 = year % 10
 	addi $t2, $t2, 48
 	addi $t0, $t0, 48
-	sb $t2, 8($a3)		# TIME[8] = $t2
-	sb $t0, 9($a3)		# TIME[9] = $t0
+	sb $t2, 8($a3)			# TIME[8] = $t2
+	sb $t0, 9($a3)			# TIME[9] = $t0
 
-	sb $0, 10($a3)		# TIME[10] = '\0'
-	add $v0, $0, $a3	# tra ve dia chi TIME
+	sb $0, 10($a3)			# TIME[10] = '\0'
+	add $v0, $0, $a3		# tra ve dia chi TIME
 	jr $ra
 
 # Ham chuyen doi dinh dang DD/MM/YYYY
@@ -492,7 +491,7 @@ Convert_C:
 
 	addi $t1, $0, 32	# 32 = ' '
 	sb $t1, 2($t0)		# temp_1[2] = ' '
-	sb $0, 3($t0)	# temp_1[3] = '\0'
+	sb $0, 3($t0)		# temp_1[3] = '\0'
 	sw $t0, 4($sp)		# luu temp_1
 
 	# Copy ", YYYY" vao temp_2
@@ -510,7 +509,7 @@ Convert_C:
 	sb $t1, 4($t0)		# temp_2[4] = $t1
 	lb $t1, 9($a0) 		# $t1 = TIME[9]
 	sb $t1, 5($t0)		# temp_2[5] = $t1
-	sb $0, 6($t0)	# TIME_2[6] = '\0'
+	sb $0, 6($t0)		# TIME_2[6] = '\0'
 	sw $t0, 0($sp) 		# luu temp_2
 
 	# Ghep temp_1, month va temp_2 vao TIME
@@ -582,7 +581,6 @@ Month:
 #	$a0 : chuoi TIME
 # 	$v0 : nam trong TIME
 Year:
-	
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 
@@ -686,53 +684,67 @@ GetTime_exit:
 	jr $ra
 	
 # Ham tra ve thu trong tuan cua ngay trong TIME
-# Cong thuc Gauss tinh thu trong tuan :
-# WeekDay = (d + m + Y + C) mod 7
+# Phuong phap Sakamoto tinh thu trong tuan :
+# WeekDay = (d + m + y + (y div 4) - (y div 100) + (y div 400)) mod 7
 #	d : day
 #	m : month code
 # 	Month:	1	2	3	4	5	6	7	8	9	10	11	12
 #	Code:	0	3	2	5	0	3	5	1	4	6	2	4
-#	Y : year code		Y = y + y div 4		voi y la 2 chu so cuoi trong year
-#	C : century code 	C = ( c div 4 - 2 * c ) mod 7 voi c la 2 chu so dau cua year
+#	y : year	neu month < 3 thi y = year - 1
 #	Weekday:	0	1	2	3	4	5	6
-#	Result:	Sun	Mon	Tue	Wed	Thu	Fri	Sat
+#	Result:		Sun	Mon	Tue	Wed	Thu	Fri	Sat
 #	$a0 : TIME
 #	$v0 : Thu trong tuan
 Weekday:
-	addi $sp, $sp, -32
-	sw $ra, 28($sp)
-	sw $a0, 24($sp)
+	addi $sp, $sp, -24
+	sw $ra, 20($sp)
+	sw $a0, 16($sp)
 	
 	jal Day
-	sw $v0, 20($sp)	
+	sw $v0, 12($sp)	
 	
 	jal Month
-	sw $v0, 16($sp)
-	
-	jal Year
-	sw $v0, 12($sp)
-	
-	lw $a0, 16($sp)
-	jal get_month_code
 	sw $v0, 8($sp)
 	
-	lw $a0, 12($sp)
-	jal get_year_code
+	jal Year
 	sw $v0, 4($sp)
 	
-	lw $a0, 12($sp)
-	jal get_century_code
+	lw $a0, 8($sp)
+	jal get_month_code
 	sw $v0, 0($sp)
 	
-	lw $t0, 20($sp)		# t0 = d
-	lw $t1, 8($sp)		# t1 = m
-	lw $t2, 4($sp)		# t2 = Y
-	lw $t3, 0($sp)		# t3 = C
+	# t0 = d
+	# t1 = m
+	# t2 = y + (y div 4) - (y div 100) + (y div 400)
+	lw $t0, 8($sp)		# t0 = month
+	lw $t1, 4($sp)		# t1 = year
+	slti $t3, $t0, 3
+	beq $t3, $0, get_year_code
+	addi $t1, $t1, -1
+get_year_code:	
+	add $t2, $0, $t1	# t2 = t1 = y
 	
-	add $v0, $v0, $t0
+	addi $t0, $0, 4
+	div $t1, $t0
+	mflo $t0		# t0 = y div 4
+	add $t2, $t2, $t0	# t2 = t2 + t0 = y + (y div 4)
+	
+	addi $t0, $0, 100
+	div $t1, $t0
+	mflo $t0		#t t0 = y div 100
+	sub $t2, $t2, $t0	# t2 = t2 - t0 = y + (y div 4) - (y div 100)
+	
+	addi $t0, $t0, 400
+	div $t1, $t0
+	mflo $t0		# t0 = y div 400
+	add $t2, $t2, $t0	# t2 = y + (y div 4) - (y div 100) + (y div 400)
+	
+	lw $t0, 12($sp)		# t1 = d
+	lw $t1, 0($sp)		# t2 = m
+	
+	add $v0, $0, $t0
 	add $v0, $v0, $t1
-	add $v0, $v0, $t2
-	add $v0, $v0, $t3	# v0 = t0 + t1 + t2 + t3
+	add $v0, $v0, $t2	# v0 = t0 + t1 + t2
 	
 	addi $t0, $0, 7	
 	div $v0, $t0
@@ -778,9 +790,9 @@ Fri:
 Sat:
 	la $v0, str_Sat
 Weekday_exit:
-	lw $ra, 28($sp)
-	lw $a0, 24($sp)
-	addi $sp, $sp, 32
+	lw $ra, 20($sp)
+	lw $a0, 16($sp)
+	addi $sp, $sp, 24
 	jr $ra
 	
 # Ham nhap thoi gian theo ngay, thang, nam
@@ -844,6 +856,7 @@ time_input:
 	syscall
 	jal is_only_digits 	# kiem tra hop le syntax nam
 	add $s0, $s0, $v0	# $s0 += hop le nam
+	
 	# Chuyen nam string -> int
 	lw $a0, 20($sp) 	# $a0 luu time_temp
 	jal string_to_int_all
@@ -895,12 +908,12 @@ check_time_valid:
 	bne $t0, $0, check_time_valid_khong 	# neu month < 1
 	slti $t0, $t1, 13
 	beq $t0, $0 , check_time_valid_khong 	# neu month >= 13
-	sw $t1, 4($sp)				# $t1 will lose in next jal
+	sw $t1, 4($sp)	
 
 	# Check day in month
 	jal Day
 	add $t2, $0, $v0			# $t2 = day
-	lw $t1, 4($sp)				# restore $t1 after jal
+	lw $t1, 4($sp)
 
 	addi $t3, $0, 1			# $t3 = thang 1
 	beq $t1, $t3, check_31_ngay
@@ -930,23 +943,23 @@ check_31_ngay:
 	slti $t0, $t2, 1
 	bne $t0, $0, check_time_valid_khong	# neu day < 1
 	slti $t0, $t2, 32
-	beq $t0, $0, check_time_valid_khong	# neu day >= 32
+	beq $t0, $0, check_time_valid_khong	# neu day > 31
 	j check_time_valid_co
 check_30_ngay:
 	slti $t0, $t2, 1
 	bne $t0, $0, check_time_valid_khong	# neu day < 1
 	slti $t0, $t2, 31
-	beq $t0, $0, check_time_valid_khong	# neu day >= 31
+	beq $t0, $0, check_time_valid_khong	# neu day > 30
 	j check_time_valid_co
 check_thang_2:
 	slti $t0, $t2, 1
-	bne $t0, $0, check_time_valid_khong	# neu day <
+	bne $t0, $0, check_time_valid_khong	# neu day < 1
 	slti $t0, $t2, 30
-	beq $t0, $0, check_time_valid_khong	# neu day >= 30
-	sw $t2, 0($sp)				# luu $t2 before jal
+	beq $t0, $0, check_time_valid_khong	# neu day > 29
+	sw $t2, 0($sp)				
 	jal LeapYear
 	add $t4, $0, $v0			# check nam khong nhuan
-	lw $t2, 0($sp)				# restore $t2 after jal
+	lw $t2, 0($sp)				
 	beq $t4, $0, check_thang_2_khong_nhuan	# neu nam khong nhuan
 	j check_time_valid_co
 check_thang_2_khong_nhuan:
@@ -1153,45 +1166,6 @@ case_12:
 	addi $v0, $0, 4
 get_month_code_exit:
 	jr $ra
-	
-# Ham lay year code tu 2 chu so cuoi cua year
-#	$a0 : year
-#	$v0 : year code
-get_year_code:
-	addi $t0, $0, 100
-	div $a0, $t0
-	mfhi $t0	# t0 = year % 100
-	addi $t1, $0, 4
-	div $t0, $t1
-	mflo $t1	# t1 = (year % 100) div 4
-	add $v0, $t0, $t1
-	jr $ra
-	
-# Ham lay century code tu 2 chu so dau cua year
-#	$a0 : year
-#	$v0 : year code
-get_century_code:
-	addi $t0, $0, 100
-	div $a0, $t0
-	mflo $t0	# t0 = year div 100 = c
-	
-	addi $t1, $0, 4
-	div $t0, $t1
-	mflo $t1	# t1 = (year div 100) div 4
-	
-	sll $t0, $t0, 1	# t0 = t0 * 2
-	sub $t2, $t1, $t0	# t2 = t1 - t0 = c div 4 - 2 * c
-	
-	addi $t0, $0, 7
-	div $t2, $t0
-	mfhi $v0	# v0 = t2 % 7
-	
-	# Kiem tra v0 < 0
-	slt $t0, $v0, $0
-	beq $t0, $0, get_century_code_exit
-	addi $v0, $v0, 7
-get_century_code_exit:
-	jr $ra	
 
 # Ham tra ve hai nam nhuan gan TIME nhat
 # 	$a0 TIME
@@ -1206,6 +1180,8 @@ next_leap_year:
 	addi $v0, $v0, 1
 	sw $v0, 4($sp)		# i = year + 1
 next_leap_year_loop:
+	# Tim nam nhuan dau tien gan nhat
+	# Lay year trong TIME cong 1 len den khi nao duoc nam nhuan
 	lw $a0, 4($sp)		# get i
 	jal is_leap_year
 	bne $v0, $0, next_leap_year_next
@@ -1214,6 +1190,9 @@ next_leap_year_loop:
 	sw $t0, 4($sp)		# luu i
 	j next_leap_year_loop
 next_leap_year_next:
+	# Tim thay nam nhuan 1 thi lay nam nhuan do + 4 duoc nam nhuan 2
+	# Neu nam nhuan 1 cong 4 khong phai nam nhuan thi cong them 8
+	# VD: 2096 la nam nhuan vi chia het cho 4, 2100 = 2096 + 4 khong phai nam nhuan vi chia het cho 4 va chia het cho 100
 	lw $a0, 4($sp)		# get i
 	addi $a0, $a0, 4	# i += 4 
 	sw $a0, 0($sp)
