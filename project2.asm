@@ -805,76 +805,78 @@ Weekday_exit:
 #	$v1 tinh hop le 	1 - hop le, 0 - khong hop le
 time_input:
 	
-	addi $sp, $sp, -36
-	sw $s0, 32($sp)		# luu tinh hop le chuoi ngay, thang, nam
-	sw $ra, 28($sp)
-	sw $a0, 24($sp)
-	sw $a1, 20($sp)
+	addi $sp, $sp, -28	# luu tinh hop le chuoi ngay, thang, nam
+	sw $ra, 24($sp)
+	sw $a0, 20($sp)
+	sw $a1, 16($sp)
 
-	# $s0 kiem tra hop le bang cach
+	# kiem tra hop le bang cach
 	# tinh tong hop le ngay thang nam
-	# neu $s0 == 3, ngay thang nam deu hop le
-	add $s0, $0, $0
+	# neu tong do hop le == 3, ngay thang nam deu hop le
 
 	# Nhap chuoi ngay
 	addi $v0, $0, 4	
 	la $a0, msg_day
 	syscall
 	addi $v0, $0, 8	# syscall read string
-	lw $a0, 20($sp)		# $a0 luu time_temp
+	lw $a0, 16($sp)		# $a0 luu time_temp
 	addi $a1, $0, 20	# max size of time_temp
 	syscall
 	jal is_only_digits	# kiem tra hop le syntax ngay
-	add $s0, $s0, $v0 	# $s0 += hop le ngay
+	sw $v0, 0($sp)		# $v0 = hop le ngay
 	# Chuyen ngay string -> int
-	lw $a0, 20($sp)		# $a0 luu time_temp
+	lw $a0, 16($sp)		# $a0 luu time_temp
 	jal string_to_int_all
-	sw $v0, 16($sp)		# luu ngay dang int vao stack
+	sw $v0, 12($sp)		# luu ngay dang int vao stack
 
 	# Nhap chuoi thang
 	addi $v0, $0, 4	
 	la $a0, msg_month
 	syscall
 	addi $v0, $0, 8	# syscall read string
-	lw $a0, 20($sp)		# $a0 luu time_temp
+	lw $a0, 16($sp)		# $a0 luu time_temp
 	addi $a1, $0, 20 	# max size of time_temp
 	syscall
-	jal is_only_digits 	# kiem tra hop le syntax thang
-	add $s0, $s0, $v0	# $s0 += hop le thang
+	jal is_only_digits	# kiem tra hop le syntax thang
+	lw $t0, 0($sp)		# $v0 += hop le thang
+	add $v0, $v0, $t0
+	sw $v0, 0($sp)
 	# Chuyen thang string -> int
-	lw $a0, 20($sp)		# $a0 luu time_temp
+	lw $a0, 16($sp)		# $a0 luu time_temp
 	jal string_to_int_all
-	sw $v0, 12($sp) 	# luu thang dang int vao stack
+	sw $v0, 8($sp) 	# luu thang dang int vao stack
 
 	# Nhap chuoi nam
 	addi $v0, $0, 4	
 	la $a0, msg_year
 	syscall
 	addi $v0, $0, 8 	# syscall read string
-	lw $a0, 20($sp) 	# $a0 luu time_temp
+	lw $a0, 16($sp) 	# $a0 luu time_temp
 	addi $a1, $0, 20 	# max size of time_temp
 	syscall
 	jal is_only_digits 	# kiem tra hop le syntax nam
-	add $s0, $s0, $v0	# $s0 += hop le nam
-	
+	lw $t0, 0($sp)		# $v0 += hop le nam
+	add $v0, $v0, $t0
+	sw $v0, 0($sp)
 	# Chuyen nam string -> int
-	lw $a0, 20($sp) 	# $a0 luu time_temp
+	lw $a0, 16($sp) 	# $a0 luu time_temp
 	jal string_to_int_all
-	sw $v0, 8($sp) 		# luu nam dang int vao stack
+	sw $v0, 4($sp) 		# luu nam dang int vao stack
 
 	# Nhap vap TIME theo chuan DD/MM/YYYY
-	lw $a0, 16($sp)		# ngay dang int
-	lw $a1, 12($sp)		# thang dang int
-	lw $a2, 8($sp) 		# nam dang int
-	lw $a3, 24($sp) 	# dia chi luu TIME
+	lw $a0, 12($sp)		# ngay dang int
+	lw $a1, 8($sp)		# thang dang int
+	lw $a2, 4($sp) 		# nam dang int
+	lw $a3, 20($sp) 	# dia chi luu TIME
 	jal Date
 
 	# Kiem tra TIME hop le syntax
-	addi $t0, $0, 3	# tong hop le ngay thang nam
-	bne $s0, $t0, time_input_invalid
+	lw $t0, 0($sp)
+	addi $t1, $0, 3	# tong hop le ngay thang nam
+	bne $t0, $t1, time_input_invalid
 
 	# Kiem tra TIME hop le logic
-	lw $a0, 24($sp)
+	lw $a0, 20($sp)
 	jal check_time_valid
 	beq $v0, $0, time_input_invalid
 
@@ -884,11 +886,10 @@ time_input_invalid:
 	add $v1, $0, $0	# $v1 = 0, khong hop le
 time_input_exit:
 	
-	lw $s0, 32($sp)
-	lw $ra, 28($sp)
-	lw $a0, 24($sp)
-	lw $a1, 20($sp)
-	addi $sp, $sp, 36
+	lw $ra, 24($sp)
+	lw $a0, 20($sp)
+	lw $a1, 16($sp)
+	addi $sp, $sp, 28
 
 	add $v0, $0, $a0	# $v0 tra ve dia chi TIME
 	jr $ra	
