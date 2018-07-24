@@ -184,11 +184,24 @@ main_select_2:
 	addi $v0, $0, 12	
 	syscall
 	add $s2, $0, $v0	# $s2 = type
-
+	
+	addi $t0, $0, 65	# 65 = 'A'
+	beq $s2, $t0, main_select_2_convert
+	addi $t0, $0, 97	# 97 = 'a'
+	beq $s2, $t0, main_select_2_convert
+	addi $t0, $0, 66	# 66 = 'B'
+	beq $s2, $t0, main_select_2_convert
+	addi $t0, $0, 98	# 98 = 'b'
+	beq $s2, $t0, main_select_2_convert
+	addi $t0, $0, 67	# 67 = 'C'
+	beq $s2, $t0, main_select_2_convert
+	addi $t0, $0, 99	# 99 = 'c'
+	beq $s2, $t0, main_select_2_convert
+	j main_select_2_again
+main_select_2_convert:
 	add $a0, $0, 10		# 10 = '\n'
 	addi $v0, $0, 11	
 	syscall
-
 	# Convert
 	add $a0, $0, $s0	# TIME_1
 	add $a1, $0, $s2	
@@ -202,6 +215,14 @@ main_select_2:
 	addi $v0, $0, 4	
 	syscall
 	j main_exit
+main_select_2_again:
+	add $a0, $0, 10		# 10 = '\n'
+	addi $v0, $0, 11	
+	syscall
+	la $a0, msg_type_invalid
+	addi $v0, $0, 4	
+	syscall
+	j main_select_2
 
 main_select_3:
 	addi $sp, $sp, -4
@@ -381,11 +402,16 @@ Date:
 Convert:
 	addi $t0, $0, 65	# 65 = 'A'
 	beq $a1, $t0, Convert_A
+	addi $t0, $0, 97	# 97 = 'a'
+	beq $a1, $t0, Convert_A
 	addi $t0, $0, 66	# 66 = 'B'
+	beq $a1, $t0, Convert_B
+	addi $t0, $0, 98	# 98 = 'b'
 	beq $a1, $t0, Convert_B
 	addi $t0, $0, 67	# 67 = 'C'
 	beq $a1, $t0, Convert_C
-	j Convert_invalid
+	addi $t0, $0, 99	# 99 = 'c'
+	beq $a1, $t0, Convert_C
 Convert_A:
 	# DD/MM/YYYY -> MM/DD/YYYY
 	lb $t0, 0($a0)		# $t0 = TIME[0]
@@ -467,7 +493,6 @@ Convert_B:
 	j Convert_exit
 Convert_C:
 	# DD/MM/YYYY -> DD Month, YYYY
-	
 	addi $sp, $sp, -24
 	sw $ra, 20($sp)
 	sw $a0, 16($sp)
@@ -526,21 +551,6 @@ Convert_C:
 	lw $a0, 16($sp)
 	lw $a1, 12($sp)
 	addi $sp, $sp, 24
-
-	j Convert_exit
-Convert_invalid:
-	addi $sp, $sp, -8
-	sw $a0, 4($sp)
-	sw $a1, 0($sp)
-
-	la $a0, msg_type_invalid
-	addi $v0, $0, 4	
-	syscall
-
-	lw $a0, 4($sp)
-	lw $a1, 0($sp)
-	addi $sp, $sp, 8
-	j main_select_2
 Convert_exit:
 	add $v0, $0, $a0	# tra ve dia chi TIME
 	jr $ra
@@ -568,7 +578,7 @@ Month:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 
-	# ngay luu tu vi tri 3 den vi tri 5 trong TIME
+	# ngay luu tu vi tri 3 den vi tri 4 trong TIME
 	addi $a1, $0, 3
 	addi $a2, $0, 4
 	jal string_to_int_part
@@ -651,13 +661,13 @@ GetTime_Swap:
 GetTime_case_1:
 	sw $v0, 0($sp)		# luu tam ket qua vao stack
 	# hien tai a0 > a1
-	# Neu (month (a1) > month (a0)) || (month (a1) == month (a0) && day (a1) > day (a0)) thi lay ket qua tru 1
-	# case 1 : month (a1) > month (a0)
+	# Neu (month (a0) < month (a1)) || (month (a0) == month (a1) && day (a0) < day (a1)) thi lay ket qua tru 1
+	# case 1 : month (a0) < month (a1)
 	lw $t1, 20($sp)	# t1 = month (a0)
 
 	lw $t2, 8($sp)	# t2 = month (a1)
 	
-	slt $t0, $t1, $t2
+	slt $t0, $t2, $t1
 	bne $t0, $0, GetTime_exit	# month (a1) < month (a0) => Ket qua khong doi
 	
 	beq $t1, $t2, GetTime_case_2	# month (a1) = month (a0) => xet case 2
@@ -709,35 +719,93 @@ Weekday:
 	jal Year
 	sw $v0, 4($sp)
 	
-	lw $a0, 8($sp)
-	jal get_month_code
-	sw $v0, 0($sp)
+	lw $t0, 8($sp)		# t0 = month
+Weekday_get_month_code:
+case_1:	
+	addi $t1, $0, 1
+	bne $t0, $t1, case_2	# month != 1 -> xet TH2
+	add $t2, $0, $0
+	j Weekday_get_month_code_exit
+case_2:	
+	addi $t1, $0, 2
+	bne $t0, $t1, case_3	# month != 2 -> xet TH3
+	addi $t2, $0, 3
+	j Weekday_get_month_code_exit
+case_3:	
+	addi $t1, $0, 3
+	bne $t0, $t1, case_4	# month != 3 -> xet TH4
+	addi $t2, $0, 2
+	j Weekday_get_month_code_exit
+case_4:	
+	addi $t1, $0, 4
+	bne $t0, $t1, case_5
+	addi $t2, $0, 5
+	j Weekday_get_month_code_exit
+case_5:	
+	addi $t1, $0, 5
+	bne $t0, $t1, case_6	
+	add $t2, $0, $0
+	j Weekday_get_month_code_exit
+case_6:	
+	addi $t1, $0, 6
+	bne $t0, $t1, case_7	
+	addi $t2, $0, 3
+	j Weekday_get_month_code_exit
+case_7:	
+	addi $t1, $0, 7
+	bne $t0, $t1, case_8	
+	addi $t2, $0, 5
+	j Weekday_get_month_code_exit
+case_8:	
+	addi $t1, $0, 8
+	bne $t0, $t1, case_9	
+	addi $t2, $0, 1
+	j Weekday_get_month_code_exit
+case_9:	
+	addi $t1, $0, 9
+	bne $t0, $t1, case_10	
+	addi $t2, $0, 4
+	j Weekday_get_month_code_exit
+case_10:	
+	addi $t1, $0, 10
+	bne $t0, $t1, case_11	
+	addi $t2, $0, 6
+	j Weekday_get_month_code_exit
+case_11:	
+	addi $t1, $0, 11
+	bne $t0, $t1, case_12	
+	addi $t2, $0, 2
+	j Weekday_get_month_code_exit
+case_12:	
+	addi $t2, $0, 4
+Weekday_get_month_code_exit:
+	sw $t2, 0($sp)		# luu m = month code vao stack
+	
+	lw $t0, 4($sp)		# t1 = year
+	slti $t3, $t0, 3
+	beq $t3, $0, Weekday_get_year_code
+	addi $t0, $t0, -1
+Weekday_get_year_code:
+	add $t2, $0, $t0	# t2 = t0 = y
+	
+	addi $t1, $0, 4
+	div $t0, $t1
+	mflo $t1		# t1 = y div 4
+	add $t2, $t2, $t1	# t2 = t2 + t1 = y + (y div 4)
+	
+	addi $t1, $0, 100
+	div $t0, $t1
+	mflo $t1		#t t1 = y div 100
+	sub $t2, $t2, $t1	# t2 = t2 - t1 = y + (y div 4) - (y div 100)
+	
+	addi $t1, $t0, 400
+	div $t0, $t1
+	mflo $t1		# t1 = y div 400
+	add $t2, $t2, $t1	# t2 = y + (y div 4) - (y div 100) + (y div 400)
 	
 	# t0 = d
 	# t1 = m
 	# t2 = y + (y div 4) - (y div 100) + (y div 400)
-	lw $t0, 8($sp)		# t0 = month
-	lw $t1, 4($sp)		# t1 = year
-	slti $t3, $t0, 3
-	beq $t3, $0, get_year_code
-	addi $t1, $t1, -1
-get_year_code:	
-	add $t2, $0, $t1	# t2 = t1 = y
-	
-	addi $t0, $0, 4
-	div $t1, $t0
-	mflo $t0		# t0 = y div 4
-	add $t2, $t2, $t0	# t2 = t2 + t0 = y + (y div 4)
-	
-	addi $t0, $0, 100
-	div $t1, $t0
-	mflo $t0		#t t0 = y div 100
-	sub $t2, $t2, $t0	# t2 = t2 - t0 = y + (y div 4) - (y div 100)
-	
-	addi $t0, $t0, 400
-	div $t1, $t0
-	mflo $t0		# t0 = y div 400
-	add $t2, $t2, $t0	# t2 = y + (y div 4) - (y div 100) + (y div 400)
 	
 	lw $t0, 12($sp)		# t1 = d
 	lw $t1, 0($sp)		# t2 = m
@@ -1102,72 +1170,7 @@ is_leap_year_false:
 	add $v0, $0, $0			# $t0 tra ve 0 la nam khnog nhuan
 is_leap_year_exit:
 	jr $ra
-
-# Ham lay code tu month
-#	$a0 : month
-#	$v0 : month code
-get_month_code:
-
-case_1:	
-	addi $t0, $0, 1
-	bne $a0, $t0, case_2	# month != 1 -> xet TH2
-	add $v0, $0, $0
-	j get_month_code_exit
-case_2:	
-	addi $t0, $0, 2
-	bne $a0, $t0, case_3	# month != 2 -> xet TH3
-	addi $v0, $0, 3
-	j get_month_code_exit
-case_3:	
-	addi $t0, $0, 3
-	bne $a0, $t0, case_4	# month != 3 -> xet TH4
-	addi $v0, $0, 2
-	j get_month_code_exit
-case_4:	
-	addi $t0, $0, 4
-	bne $a0, $t0, case_5
-	addi $v0, $0, 5
-	j get_month_code_exit
-case_5:	
-	addi $t0, $0, 5
-	bne $a0, $t0, case_6	
-	add $v0, $0, $0
-	j get_month_code_exit
-case_6:	
-	addi $t0, $0, 6
-	bne $a0, $t0, case_7	
-	addi $v0, $0, 3
-	j get_month_code_exit
-case_7:	
-	addi $t0, $0, 7
-	bne $a0, $t0, case_8	
-	addi $v0, $0, 5
-	j get_month_code_exit
-case_8:	
-	addi $t0, $0, 8
-	bne $a0, $t0, case_9	
-	addi $v0, $0, 1
-	j get_month_code_exit
-case_9:	
-	addi $t0, $0, 9
-	bne $a0, $t0, case_10	
-	addi $v0, $0, 4
-	j get_month_code_exit
-case_10:	
-	addi $t0, $0, 10
-	bne $a0, $t0, case_11	
-	addi $v0, $0, 6
-	j get_month_code_exit
-case_11:	
-	addi $t0, $0, 11
-	bne $a0, $t0, case_12	
-	addi $v0, $0, 2
-	j get_month_code_exit
-case_12:	
-	addi $v0, $0, 4
-get_month_code_exit:
-	jr $ra
-
+	
 # Ham tra ve hai nam nhuan gan TIME nhat
 # 	$a0 TIME
 #	$v0 nam nhuan 1
